@@ -35,7 +35,7 @@ void Enemy::move(){
     if(pos().y() > scene()->height()){
         scene()->removeItem(this);
         game->deficit->decrease(getEcts());
-        //game->enemyList.insert(game->enemyList.indexOf(this)+5, this);
+        game->courseList.insert(game->enemyList.indexOf(this)+7, new Course(getName(), getEcts()));
         //changeStatus(true);
         game->enemyList.removeAll(this);
         delete this;
