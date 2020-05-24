@@ -15,6 +15,7 @@ public:
 
     //Zwracanie wartosci ilosci punktow
     int getScore(){ return score; }
+    void resetScore(){ score = 0; }
 };
 
 #endif // SCORE_H

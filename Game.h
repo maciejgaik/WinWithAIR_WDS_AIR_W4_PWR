@@ -18,6 +18,7 @@
 #include <QVector>
 #include <QLabel>
 #include <iostream>
+#include <QGraphicsTextItem>
 
 #include "Player.h"
 #include "Score.h"
@@ -27,28 +28,38 @@
 
 class Game: public QMainWindow{
     Q_OBJECT
+
     QTimer *timer1;
     QTimer *timer2;
-    QTimer *timer3;
-    QTimer *timer4;
     QPushButton *closeButton;
     QPushButton *pauseButton;
+    QPushButton *newGameButton;
+    QPushButton *fasterButton;
+    QPushButton *slowerButton;
     QStatusBar *statusBar;
     QToolBar *toolBar;
     QVBoxLayout *layout;
     QWidget *window;
     QLabel *dot;
     QLabel *text;
-
-    //Wykres
+    QGraphicsTextItem *gameOverText;
+    QGraphicsTextItem *speedText;
     QCustomPlot *customPlot;
     QVector<double> x;
     QVector<double> y0;
     QVector<double> y1;
+    int enemyMoveInterval = 50;
+    int textSpeed = 100;
+    bool gameOverFlag = false;
+
     void plot();
     void makeEnemy();
-
-    int pEnemy;
+    void deleteEnemy();
+    void makePlayer();
+    void makeText();
+    void makeButtons();
+    void makeToolbar();
+    void makeStatusBar();
 
 public:
     Game(QWidget *parent = 0);
@@ -59,22 +70,29 @@ public:
     Deficit *deficit;
     QList<Enemy *> enemyList;
     QList<Course *> courseList;
+    int pEnemy = 0;
 
     //Dodawnaie punktu do wykresu
     void addPoint(double y0, double y1);
+    void gameOver();
 
 private slots:
     //Zakonczenie dzialania
     void end();
-
-    //Zatrzymywanie dzialania
-    void delay();
 
     //Generowanie bloczkow
     void spawn();
 
     //Wyswietlanie tekstu na belce statusowej
     void textStatusBar();
+
+    //Zatrzymywanie dzialania
+    void delay();
+
+    void newGame();
+
+    void faster();
+    void slower();
 };
 
 #endif // GAME_H

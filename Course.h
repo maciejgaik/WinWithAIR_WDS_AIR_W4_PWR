@@ -8,10 +8,10 @@ class Course{
     int ects;
     bool status;
 public:
-    Course(QString n, int e){
+    Course(QString n, int e, bool s = false){
         name = n;
         ects = e;
-        status = false;
+        status = s;
     }
 
     QString getName() const {return name;}

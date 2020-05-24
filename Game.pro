@@ -25,6 +25,7 @@ SOURCES += \
     Game.cpp \
     Player.cpp \
     Score.cpp \
+    Serialport.cpp \
     main.cpp \
     qcustomplot.cpp
 
@@ -35,6 +36,7 @@ HEADERS += \
     Game.h \
     Player.h \
     Score.h \
+    Serialport.h \
     qcustomplot.h
 
 # Default rules for deployment.
