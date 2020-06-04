@@ -24,10 +24,10 @@ SOURCES += \
     Enemy.cpp \
     Game.cpp \
     Player.cpp \
+    QCP/qcustomplot.cpp \
     Score.cpp \
     Serialport.cpp \
     main.cpp \
-    qcustomplot.cpp
 
 HEADERS += \
     Course.h \
@@ -35,11 +35,14 @@ HEADERS += \
     Enemy.h \
     Game.h \
     Player.h \
+    QCP/qcustomplot.h \
     Score.h \
-    Serialport.h \
-    qcustomplot.h
+    Serialport.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    Resource.qrc

@@ -1,7 +1,15 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <QGraphicsRectItem>
+/*!
+ *\file
+ *\brief Definicja klasy Player
+ *
+ * Klasa tworzy postac gracza, dodaje skin, odpowiada
+ * za ruch oraz połączenie z mikrokontrolerem
+ */
+
+#include <QGraphicsPixmapItem>
 #include <QKeyEvent>
 #include <QGraphicsScene>
 #include <QObject>
@@ -13,27 +21,81 @@
 #include "Enemy.h"
 #include "Serialport.h"
 
-class Player: public QObject, public QGraphicsRectItem{
+class Player: public QObject, public QGraphicsPixmapItem{
     Q_OBJECT
-    int flag = 0;
+
+    /*!
+     * \brief Interwał ruchu
+     */
     QTimer *timer1;
+
+    /*!
+     * \brief Interwał sprawdzania połaczenia
+     */
     QTimer *timer2;
+
+    /*!
+     * \brief Obiekt klasy serialPort - połączenie z portem
+     */
     serialPort *device;
 
-    //Obslga klawiatury
-    void keyPressEvent(QKeyEvent * event);
-public:
-        //Konstrukor tworzacy nowy QSerialport
-        Player();
-        bool checkConn();
-        //Zatrzymywanie ruchu
-        void stopMove(){timer1->stop();}
+    /*!
+     * \brief Skala obrazów skinu
+     */
+    double scale = 0.5;
 
-        //Wznawianie ruchu
-        void startMove(){timer1->start();}
+    /*!
+     * \brief Obsługa klawiatury
+     * \param [in] event naciśnięty przycisk
+     */
+    void keyPressEvent(QKeyEvent *event);
+
+public:
+        /*!
+         *\brief Konstrukor inicjalizujacy nowy obiekt klasy SerialPort.
+         * Łaczy slot move z timer1 oraz slot checkConn z timer2
+         */
+        Player();
+
+        /*!
+         * \brief Sprawdza połaczenie z portem
+         * \retval true - połączono
+         * \retval false - rozłączono
+         */
+        bool checkConn();
+
+        /*!
+         * \brief Zatrzymanie ruchu obiektu
+         */
+        inline void stopMove(){timer1->stop();}
+
+        /*!
+         * \brief Wznowienie ruchu obiektu
+         */
+        inline void startMove(){timer1->start();}
+
+        /*!
+         * \brief Zwraca wartosc uzytej skali
+         */
+        inline double getScale() const {return scale;}
+
+        /*!
+         * \brief Usuwanie obiekt u klasy SerialPort
+         */
+        void cleanPort();
 
 private slots:
+        /*!
+         * \brief Odpowiada za ruch obiektu
+         */
         void move();
+
+public slots:
+        /*!
+         * \brief Zmienia skin gracza
+         * \param [in] n - numer skinu
+         */
+        void changeSkin(int n);
 };
 
 #endif // PLAYER_H

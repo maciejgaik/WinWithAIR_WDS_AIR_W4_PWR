@@ -18,7 +18,7 @@ void Deficit::decrease(int value){
     setFont(QFont("times",16));
 
     if(deficyt > 11){
-        game->gameOver();
+        game->gameOver(false);
     }
 }
 

@@ -6,14 +6,13 @@ extern Game *game;
 
 serialPort::serialPort(){
     device = new QSerialPort(this);
-    timer1 =  new QTimer();
-    connect(timer1, SIGNAL(timeout()), this, SLOT(addPoint()));
-    timer1->start(100);
+    timer =  new QTimer();
+    connect(timer, SIGNAL(timeout()), this, SLOT(addPoint()));
+    timer->start(100);
 }
 
 void serialPort::readFromPort(){
    if(device->canReadLine()){
-        isData = true;
         int tmp_x = 0;
         int tmp_y = 0;
         QString data = device->readLine();
@@ -28,7 +27,7 @@ void serialPort::readFromPort(){
    //else isData = false;
 }
 
-void serialPort::connectRead(){
+void serialPort::setConnection(){
     device->setPortName("/dev/cu.SLAB_USBtoUART");
     if(device->open(QSerialPort::ReadOnly)){
         device->setBaudRate(QSerialPort::Baud115200);
@@ -71,7 +70,7 @@ bool serialPort::parseData(const char *data, int &tmp_x, int &tmp_y){
 
 void serialPort::UART(){
     if(checkConn()){
-        connectRead();
+        setConnection();
         connect(device, SIGNAL(readyRead()), this, SLOT(readFromPort()));
         created = true;
     }
@@ -89,7 +88,7 @@ bool serialPort::checkConn(){
 }
 
 void serialPort::addPoint(){
-    game->addPoint(move_x/1000.0*90.0,move_y/1000.0*90.0);
+    game->addPoint(move_x/1024.0*90.0,move_y/1024.0*90.0);
 }
 
 void serialPort::serialErrorHandler(QSerialPort::SerialPortError errorMessage){

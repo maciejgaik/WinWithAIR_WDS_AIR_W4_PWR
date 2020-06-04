@@ -1,6 +1,17 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+/*!
+ *
+ * \file
+ * \brief Definicja klasy Enemy
+ * Plik zawiera definicję klasy Enemy, ktora jest
+ * klasa pochodna QGraphicsEllipseItem oraz Course.
+ * Klasa odpowida za obiekty spadających bloczków,
+ * ich ruch oraz usuwanie
+ *
+ */
+
 #include <QGraphicsEllipseItem>
 #include <QTimer>
 #include <QObject>
@@ -11,6 +22,7 @@
 #include <QString>
 #include <QGraphicsTextItem>
 #include <QColor>
+#include <QBrush>
 
 #include "Player.h"
 #include "Course.h"
@@ -18,25 +30,57 @@
 class Enemy: public QObject, public QGraphicsEllipseItem, public Course{
     Q_OBJECT
 
-    //Timer sluzacy do ruchu obiektu
+    /*!
+     * \brief Interwał ruchu bloczków
+     */
     QTimer *timer;
+
 public:
-    //Konstruktor ustawiajacy rozmiar i losowa pozycje oraz wykonanie connect timera i move
-    Enemy(int interval, QString n, int e, bool s = false);
+    /*!
+     * \brief Konstruktor ustawiajacy rozmiar i losowa pozycje oraz
+     * połączenie timera ze slotem move
+     * \param [in] interval - interwał ruchu bloczków
+     * \param [in] _name - nazwa bloczku
+     * \param [in] _ects - wartosc punktowa
+     * \param [in] _status - status czy bloczek danego kursu był juz tworzony
+     */
+    Enemy(int interval, QString _name, int _ects, bool _status = false);
 
-    //Zatrzymywanie ruchu
-    void stopMove(){timer->stop();}
+    /*!
+     * \brief Zatrzymanie ruchu obiektu
+     */
+    inline void stopMove(){timer->stop();}
 
-    //Wznawianie ruchu
-    void startMove(){timer->start();}
-    QGraphicsTextItem *text;
-    QGraphicsTextItem *t_ects;
+    /*!
+     * \brief Wznowienie ruchu obiektu
+     */
+    inline void startMove(){timer->start();}
+
+    /*!
+     * \brief Obiekt klasy QGraphicsTextItem nazwy kursu
+     */
+    QGraphicsTextItem *nameText;
+
+    /*!
+     * \brief Obiekt klasy QGraphicsTextItem wartosci punktów
+     */
+    QGraphicsTextItem *ectsText;
+
+    /*!
+     * \brief Zmniejszenie interwału ruchu
+     */
     void faster();
+
+    /*!
+     * \brief Zwiększenie interwału ruchu
+     */
     void slower();
-public slots:
-    //Metoda odpowiadajaca za ruch
+
+private slots:
+    /*!
+     * \brief Odpowiada za ruch bloczków
+     */
     void move();
-    //void timeMoveStart();
 };
 
 #endif // ENEMY_H

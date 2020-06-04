@@ -7,6 +7,7 @@ Game::Game(QWidget *parent){
     //Tworzenie sceny
     gameScene =  new QGraphicsScene();
     gameScene->setSceneRect(0,0,600,800);
+    gameScene->setBackgroundBrush(QBrush(QImage(":images/bg.png")));
     QGraphicsView * gameSceneView = new QGraphicsView(gameScene);
     gameSceneView->setFixedSize(605,805);
     layout->addWidget(gameSceneView, 0, Qt::AlignHCenter);
@@ -23,12 +24,14 @@ Game::Game(QWidget *parent){
     //Belka stusowa
     makeStatusBar();
 
-    //Toolbar
-    makeToolbar();
-
     //Przyciski
     makeButtons();
 
+    //Toolbar
+    makeToolbar();
+
+    //Zmiana skinu
+    connect(timer1, SIGNAL(timeout()), this, SLOT(checkEcts()));
 
     //Wykresy
     plot();
@@ -42,6 +45,8 @@ Game::Game(QWidget *parent){
     layout->addWidget(toolBar);
     window->setLayout(layout);
     setCentralWidget(window);
+
+    delay();
 }
 
 void Game::plot(){
@@ -77,7 +82,6 @@ void  Game::delay(){
             for(int i = 0; i < enemyList.size(); i++){
                 enemyList[i]->stopMove();
             }
-            pauseButton->setText("Start");
         }
         else{
             for(int i = 0; i < enemyList.size(); i++){
@@ -85,7 +89,6 @@ void  Game::delay(){
             }
             timer2->start();
             player->startMove();
-            pauseButton->setText("Pauza");
         }
     }
 }
@@ -94,20 +97,20 @@ void Game::spawn(){
     if(pEnemy < courseList.size()){
         enemyList.append(new Enemy(enemyMoveInterval, courseList[pEnemy]->getName(), courseList[pEnemy]->getEcts(), courseList[pEnemy]->getStatus()));
         gameScene->addItem(enemyList.back());
-        gameScene->addItem(enemyList.back()->text);
-        gameScene->addItem(enemyList.back()->t_ects);
+        gameScene->addItem(enemyList.back()->nameText);
+        gameScene->addItem(enemyList.back()->ectsText);
         pEnemy++;
     }
 }
 
 void Game::textStatusBar(){
     if (player->checkConn()){
-        text->setText("Połączono");
-        dot->setStyleSheet("background-color: green; border-radius: 5px;");
+        statusText->setText("Połączono");
+        statusDot->setStyleSheet("background-color: green; border-radius: 5px;");
     }
     else{
-        text->setText("Nie połączono");
-        dot->setStyleSheet("background-color: red; border-radius: 5px;");
+        statusText->setText("Nie połączono");
+        statusDot->setStyleSheet("background-color: red; border-radius: 5px;");
     }
 }
 
@@ -202,11 +205,14 @@ void Game::makeEnemy(){
 void Game::newGame(){
     pEnemy = 0;
     textSpeed = 100;
+    enemyMoveInterval = 50;
+    timer2->setInterval(2000);
     gameOverFlag = false;
     while(enemyList.size() > 0)
         enemyList.removeLast();
     for(int i = 0; i < courseList.size(); i++)
         courseList[i]->changeStatus(false);
+    player->cleanPort();
     gameScene->clear();
     makePlayer();
     makeText();
@@ -232,30 +238,44 @@ void Game::slower(){
     }
 }
 
+void Game::checkEcts(){
+    if(score->getScore() >= 30 && score->getScore() < 60)        player->changeSkin(2);
+    else if(score->getScore() >= 60 && score->getScore() < 90)   player->changeSkin(3);
+    else if(score->getScore() >= 90 && score->getScore() < 120)  player->changeSkin(4);
+    else if(score->getScore() >= 120 && score->getScore() < 150) player->changeSkin(5);
+    else if(score->getScore() == 150 && score->getScore() < 180) player->changeSkin(6);
+    //else player->changeSkin(1);
+}
+
 void Game::deleteEnemy(){
     for(int i = enemyList.size(); i == 0; i--){
         enemyList.removeLast();
     }
 }
 
-void Game::gameOver(){
+void Game::gameOver(bool win){
     delay();
     gameOverText = new QGraphicsTextItem;
-    gameOverText->setPlainText(QString("Przekroczono deficyt!"));
+    if(!win){
+        gameOverText->setPlainText(QString("Przekroczono deficyt!"));
+    }
+    else if(win){
+        gameOverText->setPlainText(QString("    Gratulacje!\nUzyskałeś tytuł\n     inż. AiR!"));
+    }
     gameOverText->setDefaultTextColor(Qt::red);
-    gameOverText->setFont(QFont("times",38));
+    gameOverText->setFont(QFont("times",42));
     gameScene->addItem(gameOverText);
-    gameOverText->setPos(150,420);
+    gameOverText->setPos(gameScene->width()/2-gameOverText->boundingRect().width()/2,gameScene->height()/2-gameOverText->boundingRect().height()/2);
     gameOverFlag = true;
 }
 
 void Game::makePlayer(){
     player = new Player();
     gameScene->addItem(player);
-    player->setRect(0,0,100,100);
+   // player->setRect(0,0,100,100);
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
-    player->setPos((gameScene->width() - player->rect().width())/2, gameScene->height() - player->rect().height());
+    player->setPos((gameScene->width() - player->boundingRect().width()*player->getScale())/2, gameScene->height() - player->boundingRect().height()*player->getScale());
 }
 
 void Game::makeText(){
@@ -273,29 +293,24 @@ void Game::makeText(){
 void Game::makeButtons(){
     //Przycisk wolniej
     slowerButton = new QPushButton(QObject::tr("<<"));
-    toolBar->addWidget(slowerButton);
     connect(slowerButton, SIGNAL(clicked()), this, SLOT(slower()));
 
     //Przycisk szybciej
     fasterButton = new QPushButton(QObject::tr(">>"));
-    toolBar->addWidget(fasterButton);
     connect(fasterButton, SIGNAL(clicked()), this, SLOT(faster()));
 
     //Przycisk Zamknij
     closeButton = new QPushButton(QObject::tr("Zamknij"));
-    toolBar->addWidget(closeButton);
     connect(closeButton, SIGNAL(clicked()), this, SLOT(end()));
     closeButton->setMinimumSize(90,32);
 
     //Przycisk nowa gra
     newGameButton = new QPushButton(QObject::tr("Reset"));
-    toolBar->addWidget(newGameButton);
     connect(newGameButton, SIGNAL(clicked()), this, SLOT(newGame()));
     newGameButton->setMinimumSize(90,32);
 
     //Przycisk pauza
-    pauseButton = new QPushButton(QObject::tr("Pauza"));
-    toolBar->addWidget(pauseButton);
+    pauseButton = new QPushButton(QObject::tr("Start/Stop"));
     connect(pauseButton, SIGNAL(clicked()), this, SLOT(delay()));
     pauseButton->setMinimumSize(90,32);
 }
@@ -320,18 +335,23 @@ void Game::makeToolbar(){
     toolBar->addWidget(legendDot2);
     toolBar->addWidget(legendText2);
     toolBar->addWidget(spacer);
+    toolBar->addWidget(slowerButton);
+    toolBar->addWidget(fasterButton);
+    toolBar->addWidget(closeButton);
+    toolBar->addWidget(newGameButton);
+    toolBar->addWidget(pauseButton);
 }
 
 void Game::makeStatusBar(){
     statusBar = new QStatusBar();
     setStatusBar(statusBar);
-    dot = new QLabel(this);
-    text = new QLabel(this);
-    dot->setFixedSize(10,10);
-    dot->setStyleSheet("background-color: red; border-radius: 5px;");
-    statusBar->addWidget(dot);
-    text->setText("Nie połączono");
-    statusBar->addWidget(text);
+    statusDot = new QLabel(this);
+    statusText = new QLabel(this);
+    statusDot->setFixedSize(10,10);
+    statusDot->setStyleSheet("background-color: red; border-radius: 5px;");
+    statusBar->addWidget(statusDot);
+    statusText->setText("Nie połączono");
+    statusBar->addWidget(statusText);
     timer1 =  new QTimer();
     connect(timer1, SIGNAL(timeout()), this, SLOT(textStatusBar()));
     timer1->start(100);
